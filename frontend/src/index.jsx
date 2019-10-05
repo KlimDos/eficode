@@ -5,7 +5,7 @@ const baseURL = process.env.ENDPOINT;
 
 const getWeatherFromApi = async () => {
   try {
-    const response = await fetch(`${baseURL}/weather`);
+    const response = await fetch(`${baseURL}/weatherinhelsinki`);
     return response.json();
   } catch (error) {
     console.error(error);
@@ -14,26 +14,111 @@ const getWeatherFromApi = async () => {
   return {};
 };
 
+const getForecastFromApi = async () => {
+  try {
+    const response = await fetch(`${baseURL}/forecast`);
+    return response.json();
+  } catch (error) {
+    console.error(error);
+  }
+
+  return {};
+};
+
+const getCoordinateWeatherFromApi = async (lon, lat) => {
+  try {
+    const response = await fetch(`${baseURL}/weatherbycoordinates?lon=${lon}&lat=${lat}`);
+    return response.json();
+  } catch (error) {
+    console.error(error);
+  }
+  return {};
+};
+
+const getCoordinateForecastFromApi = async (lon, lat) => {
+  try {
+    const response = await fetch(`${baseURL}/forecastbycoordinates?lon=${lon}&lat=${lat}`);
+    return response.json();
+  } catch (error) {
+    console.error(error);
+  }
+  return {};
+};
+
 class Weather extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      icon: "",
+      icon: '',
+      iconSoon: '',
+      timeStamp: '',
+      location: 'Helsinki',
+      useLocation: false,
+      error: '',
     };
   }
 
   async componentWillMount() {
-    const weather = await getWeatherFromApi();
-    this.setState({icon: weather.icon.slice(0, -1)});
+    this.getWeather();
+  }
+
+  async getWeather() {
+    const [weather, forecast] = await Promise.all([getWeatherFromApi(), getForecastFromApi()]);
+    if (weather && forecast) {
+      this.setState(
+        {
+          icon: weather.icon.slice(0, -1),
+          iconSoon: forecast.weather.icon.slice(0, -1),
+          timeStamp: `${new Date(forecast.time).getHours()}.00`,
+          useLocation: false,
+          location: 'Helsinki',
+          error: '',
+        });
+    } else {
+      this.setState({ error: 'Unbable to fetch weather' });
+    }
+  }
+
+  async getWeatherByLocation() {
+    window.navigator.geolocation.getCurrentPosition(async (pos) => {
+      if (pos.coords) {
+        const { longitude, latitude } = pos.coords;
+        const [weather, forecast] = await Promise.all([
+          getCoordinateWeatherFromApi(longitude, latitude),
+          getCoordinateForecastFromApi(longitude, latitude),
+        ]);
+        if (weather && forecast) {
+          this.setState({
+            location: weather.name,
+            icon: weather.weather[0].icon.slice(0, -1),
+            iconSoon: forecast.weather.icon.slice(0, -1),
+            timeStamp: `${new Date(forecast.time).getHours()}.00`,
+            useLocation: true,
+          });
+        }
+      } 
+    }, (err) => {
+      this.setState({ error: `Unable to get location, error:  ${err.message}` });
+    });
   }
 
   render() {
-    const { icon } = this.state;
+    const { icon, iconSoon, timeStamp, location, useLocation } = this.state;
+    const button = useLocation ?
+      <button onClick={() => this.getWeather()}>Show weather in Helsinki</button>:
+      <button onClick={() => this.getWeatherByLocation()}>Show weather in current location</button>;
 
     return (
-      <div className="icon">
-        { icon && <img src={`/img/${icon}.svg`} /> }
+      <div>
+        <div className="icon">
+        <h2>Curent weather in {location}</h2>
+          {icon && <img width={100} height={100} alt="weather_icon" src={`/img/${icon}.svg`} />}
+          {button}
+          
+          <h2>Weather in {location} at {timeStamp}</h2>
+          {icon && <img width={100} height={100} alt="weather_icon" src={`/img/${iconSoon}.svg`} />}
+        </div>
       </div>
     );
   }
