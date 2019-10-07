@@ -3,6 +3,7 @@ services:
     frontend:
         image: weatherapp_frontend:latest
         build:
+            dockerfile: Dockerfile.frontend
             context: ./frontend
         ports:
             - "8000:8000"
@@ -14,6 +15,7 @@ services:
     backend:
         image: weatherapp_backend:latest
         build:
+            dockerfile: Dockerfile.backend
             context: ./backend
         environment:
             APPID: "4683c985b5b3595e40e7eb5b7a1d9878" #todo Call to secure key store
