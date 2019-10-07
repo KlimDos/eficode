@@ -1,0 +1,7 @@
+[all]
+
+34.65.156.118
+
+[all:vars]
+ansible_connection=ssh
+ansible_user=sasha

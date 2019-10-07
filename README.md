@@ -1,3 +1,61 @@
+## Deployment:
+
+```
+git clone https://github.com/KlimDos/eficode.git
+```
+ - set host ip in inventory
+ - apply Ansible role against provisioning host (your local workstation even)
+```
+ansible-playbook -i inventory deploy.yml -d
+```
+ - in case you using cloud, once you ran ansible, ssh into the host and do `git clone https://github.com/KlimDos/eficode.git` again (will be changed)
+ - set openweathermap API key in docker-compose.yml
+ - spin up the app (you might need to set up proper user permissions or use `root`)
+```
+docker-compose up --build
+```
+
+## Prerequisites:
+
+ - linux
+ - ansible >=2.8.3
+ - An [openweathermap](http://openweathermap.org/) API key.
+
+## Progress:
+
+- [x] Get yourself an API key to make queries in the [openweathermap](http://openweathermap.org/).
+
+- [x] Either run the app locally (using `npm i && npm start`) or move to the next step.
+
+- [x] Add **Dockerfile**'s in the *frontend* and the *backend* directories to run them virtually on any environment having [docker](https://www.docker.com/) installed. It should work by saying e.g. `docker build -t weatherapp_backend . && docker run --rm -i -p 9000:9000 --name weatherapp_backend -t weatherapp_backend`. If it doesn't, remember to check your api key first.
+
+- [x] Add a **docker-compose.yml** -file connecting the frontend and the backend, enabling running the app in a connected set of containers.
+
+- [x] The application now only reports the current weather. It should probably report the forecast e.g. a few hours from now. (tip: [openweathermap api](https://openweathermap.org/forecast5))
+
+- [x] The developers are still keen to run the app and its pipeline on their own computers. Share the development files for the container by using volumes, and make sure the containers are started with a command enabling hot reload.
+
+- [x] There are [eslint](http://eslint.org/) errors. Sloppy coding it seems. Please help.
+
+- [x] The app currently reports the weather only for location defined in the *backend*. Shouldn't it check the browser location and use that as the reference for making a forecast? (tip: [geolocation](https://developer.mozilla.org/en-US/docs/Web/API/Geolocation/Using_geolocation))
+
+- [ ] [tests for the weak] There are no tests. Where are the tests? (tip: [mocha](https://mochajs.org/) or [robot framework](http://robotframework.org/)) Disclaimer: this is not an easy task. If you really want to try writing robot tests, start by creating a third container that gives expected weather data, and direct the backend queries there by redefining the **MAP_ENDPOINT**.
+
+- [x] [in progress] Set up the weather service in a free cloud hosting service, e.g. [AWS](https://aws.amazon.com/free/) or [Google Cloud](https://cloud.google.com/free/). 
+- [ ] [issue] *need to deal with ssl* (_index.jsx:88 [Deprecation] getCurrentPosition() and watchPosition() no longer work on insecure origins. To use this feature, you should consider switching your application to a secure origin, such as HTTPS. See https://goo.gl/rStTGz for more details.
+getWeatherByLocation @ index.jsx:88_)
+
+- [x] [in progress] Write [ansible](http://docs.ansible.com/ansible/intro.html) playbooks for installing [docker](https://www.docker.com/) and the app itself.
+- [ ] *need to set up auto app provisioning*
+
+
+
+
+
+
+
+# == original readme ==
+
 # Weatherapp
 
 There was a beautiful idea of building an app that would show the upcoming weather. The developers wrote a nice backend and a frontend following the latest principles and - to be honest - bells and whistles. However, the developers did not remember to add any information about the infrastructure or even setup instructions in the source code.

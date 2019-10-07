@@ -1,0 +1,27 @@
+version: '3.4' # aim to deploy in swarm
+services:
+    frontend:
+        image: weatherapp_frontend:latest
+        build:
+            dockerfile: Dockerfile.frontend
+            context: ./frontend
+        ports:
+            - "8000:8000"
+        volumes:
+        - ./frontend/src:/usr/src/app/src
+        depends_on:
+            - backend
+
+    backend:
+        image: weatherapp_backend:latest
+        build:
+            dockerfile: Dockerfile.backend
+            context: ./backend
+        environment:
+            APPID: "4683c985b5b3595e40e7eb5b7a1d9878" #todo Call to secure key store
+            MAP_ENDPOINT: "http://api.openweathermap.org/data/2.5" #overwrite default settings
+            TARGET_CITY: "Helsinki,fi" #overwrite default settings
+        ports:
+            - "9000:9000"
+        volumes:
+        - ./backend/src:/usr/src/app/src
